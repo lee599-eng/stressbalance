@@ -1,0 +1,1339 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="CortiSense">
+<meta name="theme-color" content="#080c14">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/icon-192.png">
+<title>CortiSense</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --bg0:#080c14; --bg1:#0d1220; --bg2:#121929; --bg3:#1a2236;
+  --border:rgba(255,255,255,0.07); --border2:rgba(255,255,255,0.13);
+  --text0:#f0f4ff; --text1:#a8b5cc; --text2:#5e7090;
+  --accent:#4fd1c5; --accent-glow:rgba(79,209,197,0.15);
+  --s1:#48d68a; --s2:#f6c343; --s3:#f97066; --s4:#c77dff;
+  --safe-top:env(safe-area-inset-top,0px);
+  --safe-bottom:env(safe-area-inset-bottom,0px);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{height:100%;background:var(--bg0);font-family:'DM Sans',system-ui,sans-serif;color:var(--text0);overflow:hidden;-webkit-font-smoothing:antialiased;}
+
+/* ── SHELL: fixed full-height, no scroll ── */
+.app{
+  display:flex;flex-direction:column;
+  height:100dvh;max-width:480px;margin:0 auto;
+  background:var(--bg0);overflow:hidden;
+}
+
+/* ── HEADER (fixed height) ── */
+.app-header{
+  flex-shrink:0;
+  padding:calc(var(--safe-top) + 8px) 18px 8px;
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--bg0);
+}
+.header-logo{display:flex;align-items:center;gap:7px;}
+.logo-circle{width:28px;height:28px;border-radius:9px;background:var(--accent-glow);border:1px solid rgba(79,209,197,0.28);display:flex;align-items:center;justify-content:center;font-size:14px;}
+.logo-text{font-size:16px;font-weight:600;letter-spacing:-0.3px;}
+.logo-text span{color:var(--accent);}
+.header-time{font-family:'DM Mono',monospace;font-size:12px;color:var(--text2);}
+
+/* ── BOTTOM NAV (fixed height) ── */
+.bottom-nav{
+  flex-shrink:0;padding-bottom:var(--safe-bottom);
+  background:var(--bg1);border-top:1px solid var(--border);display:flex;
+}
+.nav-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:9px 0 7px;cursor:pointer;border:none;background:none;}
+.nav-btn svg{width:20px;height:20px;stroke:var(--text2);transition:stroke 0.2s;}
+.nav-btn span{font-size:10px;font-weight:500;color:var(--text2);letter-spacing:0.2px;}
+.nav-btn.active svg{stroke:var(--accent);filter:drop-shadow(0 0 4px rgba(79,209,197,0.5));}
+.nav-btn.active span{color:var(--accent);}
+
+/* ── PAGE CONTAINER (fills remaining height) ── */
+.pages{flex:1;overflow:hidden;position:relative;min-height:0;}
+.page{display:none;height:100%;overflow:hidden;}
+.page.active{display:flex;flex-direction:column;}
+
+/* ════════════════════════════════════
+   MEASURE PAGE — no-scroll layout
+   ════════════════════════════════════ */
+#page-measure{padding:0;}
+
+/* Row A: input card */
+.input-card{
+  flex-shrink:0;
+  margin:8px 14px 6px;
+  background:var(--bg1);border-radius:18px;border:1px solid var(--border2);
+  padding:12px 14px;
+  display:flex;align-items:center;gap:10px;
+  position:relative;overflow:hidden;
+}
+.input-card::after{content:'';position:absolute;top:-40px;right:-40px;width:140px;height:140px;background:radial-gradient(circle,var(--accent-glow) 0%,transparent 70%);pointer-events:none;}
+
+.clock-block .clock-time{font-family:'DM Mono',monospace;font-size:34px;font-weight:300;letter-spacing:-2px;line-height:1;color:var(--text0);}
+.clock-block .clock-sub{font-size:11px;color:var(--accent);font-weight:500;margin-top:2px;}
+.clock-block .clock-date{font-size:10px;color:var(--text2);margin-top:1px;}
+
+.divider-v{width:1px;height:44px;background:var(--border);flex-shrink:0;}
+
+.input-area{flex:1;display:flex;flex-direction:column;gap:4px;}
+.input-lbl{font-size:9px;font-weight:600;color:var(--text2);letter-spacing:0.8px;text-transform:uppercase;}
+.input-row{display:flex;gap:7px;align-items:center;}
+.num-input{
+  flex:1;background:var(--bg3);border:1px solid var(--border2);border-radius:11px;
+  color:var(--text0);font-family:'DM Mono',monospace;font-size:24px;font-weight:300;
+  padding:8px 10px;letter-spacing:-1px;outline:none;
+  transition:border-color 0.2s,box-shadow 0.2s;
+  -moz-appearance:textfield;appearance:textfield;
+}
+.num-input::-webkit-inner-spin-button,.num-input::-webkit-outer-spin-button{-webkit-appearance:none;}
+.num-input:focus{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-glow);}
+.num-input.error{border-color:var(--s3);box-shadow:0 0 0 2px rgba(249,112,102,0.18);}
+.num-input::placeholder{color:var(--text2);font-size:18px;}
+.record-btn{
+  background:var(--accent);color:#081412;border:none;border-radius:11px;
+  width:46px;height:44px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;
+  cursor:pointer;transition:transform 0.15s,opacity 0.15s;flex-shrink:0;font-family:'DM Sans',sans-serif;
+}
+.record-btn:active{transform:scale(0.93);opacity:0.8;}
+.record-btn svg{width:16px;height:16px;}
+.record-btn span{font-size:9px;font-weight:600;}
+
+/* Row B: result strip */
+.result-strip{
+  flex-shrink:0;margin:0 14px 6px;
+  border-radius:13px;border:1px solid var(--border);overflow:hidden;
+  display:none;animation:fadeUp 0.3s ease;
+}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+.rs-header{padding:8px 12px;display:flex;align-items:center;gap:10px;}
+.rs-icon{font-size:18px;flex-shrink:0;}
+.rs-name{font-size:13px;font-weight:600;}
+.rs-crit{font-size:10px;margin-top:1px;opacity:0.65;}
+.rs-metrics{display:grid;grid-template-columns:1fr 1fr 1fr;border-top:1px solid var(--border);}
+.rsm{padding:7px 8px;text-align:center;border-right:1px solid var(--border);}
+.rsm:last-child{border-right:none;}
+.rsm-l{font-size:8px;color:var(--text2);letter-spacing:0.4px;text-transform:uppercase;margin-bottom:2px;}
+.rsm-v{font-family:'DM Mono',monospace;font-size:14px;color:var(--text0);}
+.rsm-u{font-size:8px;color:var(--text2);}
+
+/* Row C: date strip */
+.date-strip{
+  flex-shrink:0;display:flex;gap:5px;
+  overflow-x:auto;scrollbar-width:none;
+  padding:0 14px 5px;
+  -webkit-overflow-scrolling:touch;
+}
+.date-strip::-webkit-scrollbar{display:none;}
+.date-tab{
+  flex-shrink:0;padding:4px 11px;border-radius:8px;
+  font-size:11px;font-weight:500;cursor:pointer;
+  border:1px solid var(--border);background:var(--bg2);color:var(--text2);
+  white-space:nowrap;transition:all 0.15s;
+}
+.date-tab.active{background:var(--accent);color:#081412;border-color:var(--accent);font-weight:600;}
+.date-tab .dt-n{font-size:8px;margin-left:3px;opacity:0.7;}
+
+/* Row D: CHART — fills all remaining space */
+.chart-wrap{
+  flex:1;min-height:0;
+  margin:0 14px 6px;
+  background:var(--bg1);border-radius:16px;border:1px solid var(--border);
+  padding:10px 10px 6px;
+  display:flex;flex-direction:column;
+}
+.chart-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;flex-shrink:0;}
+.chart-top .ct-lbl{font-size:11px;font-weight:500;color:var(--text1);}
+.chart-top .ct-badge{font-size:9px;background:var(--bg3);border:1px solid var(--border);border-radius:5px;padding:2px 7px;color:var(--text2);}
+.chart-canvas-wrap{flex:1;min-height:0;position:relative;}
+.chart-canvas-wrap canvas{position:absolute;inset:0;width:100%!important;height:100%!important;}
+.chart-legend{flex-shrink:0;display:flex;gap:10px;flex-wrap:wrap;margin-top:5px;}
+.cl-item{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--text2);}
+.cl-line{width:13px;height:2px;border-radius:1px;}
+.cl-dot{width:6px;height:6px;border-radius:50%;}
+
+/* Row E: history list — scrollable, compact */
+.history-panel{
+  flex-shrink:0;
+  margin:0 14px 6px;
+  max-height:130px;overflow-y:auto;scrollbar-width:none;
+}
+.history-panel::-webkit-scrollbar{display:none;}
+.history-list{display:flex;flex-direction:column;gap:4px;}
+.hi-item{
+  background:var(--bg2);border:1px solid var(--border);border-radius:10px;
+  padding:7px 12px;display:flex;align-items:center;gap:8px;
+  animation:fadeUp 0.2s ease;
+}
+.hi-bar{width:3px;height:24px;border-radius:2px;flex-shrink:0;}
+.hi-time{font-family:'DM Mono',monospace;font-size:10px;color:var(--text2);min-width:44px;}
+.hi-cv{font-size:10px;color:var(--text2);min-width:28px;}
+.hi-conc{font-size:12px;font-weight:500;flex:1;}
+
+.hi-badge{font-size:9px;font-weight:500;padding:2px 7px;border-radius:5px;white-space:nowrap;}
+.empty-box{background:var(--bg2);border:1px dashed var(--border2);border-radius:12px;padding:16px;text-align:center;}
+.empty-box .em-ic{font-size:24px;margin-bottom:6px;}
+.empty-box p{font-size:11px;color:var(--text2);line-height:1.5;}
+
+/* ════════════════════════════════════
+   GUIDE PAGE — scrollable content
+   ════════════════════════════════════ */
+#page-guide{overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+#page-guide::-webkit-scrollbar{display:none;}
+.guide-wrap{padding:10px 14px 16px;}
+.info-box{background:var(--bg2);border:1px solid var(--border);border-radius:13px;padding:12px 14px;font-size:12px;color:var(--text1);line-height:1.7;margin-bottom:12px;}
+.info-box strong{color:var(--accent);font-weight:500;}
+.stage-chips{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:12px;}
+.schip{background:var(--bg2);border:1.5px solid var(--border);border-radius:13px;padding:10px 12px;cursor:pointer;transition:all 0.18s;text-align:left;}
+.schip-num{font-size:9px;font-weight:600;letter-spacing:0.4px;text-transform:uppercase;margin-bottom:2px;}
+.schip-name{font-size:12px;font-weight:500;color:var(--text0);}
+.schip-crit{font-size:10px;color:var(--text2);margin-top:1px;}
+.detail-card{background:var(--bg2);border:1px solid var(--border);border-radius:16px;overflow:hidden;margin-bottom:8px;}
+.dc-header{padding:13px 14px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);}
+.dc-icon{width:42px;height:42px;border-radius:13px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;}
+.dc-title{font-size:14px;font-weight:600;}
+.dc-sub{font-size:10px;margin-top:2px;opacity:0.6;}
+.dc-desc{padding:11px 14px;font-size:12px;color:var(--text1);line-height:1.7;border-bottom:1px solid var(--border);}
+.dc-section{padding:11px 14px;border-bottom:1px solid var(--border);}
+.dc-section:last-child{border-bottom:none;}
+.dcs-label{font-size:9px;font-weight:600;color:var(--text2);letter-spacing:0.7px;text-transform:uppercase;margin-bottom:8px;}
+.sym-item{display:flex;align-items:flex-start;gap:7px;font-size:12px;color:var(--text1);line-height:1.5;margin-bottom:6px;}
+.sym-item:last-child{margin-bottom:0;}
+.sym-pip{width:4px;height:4px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.relief-items{display:flex;flex-direction:column;}
+.ri-item{display:flex;align-items:flex-start;gap:10px;padding:9px 0;border-bottom:1px solid var(--border);}
+.ri-item:last-child{border-bottom:none;padding-bottom:0;}
+.ri-icon{width:32px;height:32px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
+.ri-name{font-size:12px;font-weight:500;color:var(--text0);margin-bottom:2px;}
+.ri-desc{font-size:11px;color:var(--text2);line-height:1.45;}
+
+/* ════════════════════════════════════
+   ABOUT PAGE — scrollable
+   ════════════════════════════════════ */
+#page-about{overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+#page-about::-webkit-scrollbar{display:none;}
+.about-wrap{padding:6px 14px 20px;}
+.about-hero{text-align:center;padding:16px 0 14px;}
+.ah-mark{width:64px;height:64px;border-radius:20px;background:var(--bg2);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:32px;margin:0 auto 10px;box-shadow:0 0 32px var(--accent-glow);}
+.ah-name{font-size:22px;font-weight:600;letter-spacing:-0.4px;}
+.ah-name span{color:var(--accent);}
+.ah-ver{font-size:11px;color:var(--text2);margin-top:3px;}
+.sec-label{font-size:9px;font-weight:600;color:var(--text2);letter-spacing:1px;text-transform:uppercase;margin:12px 0 6px;}
+.about-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:10px;}
+.about-row{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--border);}
+.about-row:last-child{border-bottom:none;}
+.ar-ic{width:30px;height:30px;border-radius:9px;background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0;}
+.ar-lbl{font-size:12px;font-weight:500;color:var(--text0);}
+.ar-sub{font-size:10px;color:var(--text2);margin-top:1px;}
+.formula-box{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px 14px;margin-bottom:10px;}
+.fb-lbl{font-size:9px;font-weight:600;color:var(--text2);letter-spacing:0.7px;text-transform:uppercase;margin-bottom:7px;}
+.fb-eq{font-family:'DM Mono',monospace;font-size:13px;color:var(--accent);margin-bottom:4px;}
+.fb-note{font-size:10px;color:var(--text2);line-height:1.6;}
+.ref-header{display:flex;padding:7px 14px;background:var(--bg3);border-bottom:1px solid var(--border);}
+.ref-row{display:flex;align-items:center;padding:8px 14px;border-bottom:1px solid var(--border);}
+.ref-row:last-child{border-bottom:none;}
+.ref-row .rcol{font-family:'DM Mono',monospace;font-size:12px;color:var(--accent);width:52px;}
+.ref-row .rlcol{font-size:12px;color:var(--text1);flex:1;}
+.ref-row .rhcol{font-size:12px;color:var(--text1);}
+
+/* ════ REPORT PAGE ════ */
+#page-report{overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
+#page-report::-webkit-scrollbar{display:none;}
+.report-wrap{padding:10px 14px 24px;}
+
+.rep-tab-row{display:flex;gap:6px;margin-bottom:14px;}
+.rep-tab{flex:1;padding:8px 4px;border-radius:10px;font-size:12px;font-weight:500;
+  text-align:center;cursor:pointer;border:1px solid var(--border);
+  background:var(--bg2);color:var(--text2);transition:all 0.15s;}
+.rep-tab.active{background:var(--accent);color:#081412;border-color:var(--accent);font-weight:600;}
+
+.rep-section{display:none;}
+.rep-section.active{display:block;}
+
+.rep-header-card{background:var(--bg1);border:1px solid var(--border2);
+  border-radius:16px;padding:14px 16px;margin-bottom:12px;position:relative;overflow:hidden;}
+.rep-header-card::after{content:'';position:absolute;top:-30px;right:-30px;
+  width:120px;height:120px;background:radial-gradient(circle,var(--accent-glow) 0%,transparent 70%);
+  pointer-events:none;}
+.rep-date{font-size:11px;color:var(--text2);margin-bottom:4px;}
+.rep-title{font-size:16px;font-weight:500;color:var(--text0);margin-bottom:2px;}
+.rep-sub{font-size:11px;color:var(--text2);}
+.rep-badge{display:inline-block;font-size:10px;font-weight:600;
+  padding:3px 10px;border-radius:20px;margin-top:8px;}
+
+.metrics-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.metric-card{background:var(--bg2);border:1px solid var(--border);
+  border-radius:12px;padding:10px 12px;}
+.mc-label{font-size:9px;color:var(--text2);letter-spacing:0.5px;
+  text-transform:uppercase;margin-bottom:5px;}
+.mc-val{font-size:22px;font-weight:500;color:var(--text0);line-height:1;}
+.mc-unit{font-size:9px;color:var(--text2);margin-top:2px;}
+.mc-change{font-size:10px;margin-top:4px;}
+.mc-up{color:var(--s3);}
+.mc-down{color:var(--s1);}
+
+.rep-chart-card{background:var(--bg1);border:1px solid var(--border);
+  border-radius:14px;padding:12px 10px 8px;margin-bottom:12px;}
+.rcc-title{font-size:11px;font-weight:500;color:var(--text1);margin-bottom:8px;}
+.rcc-legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
+.rcc-leg{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--text2);}
+.rcc-sq{width:8px;height:8px;border-radius:2px;}
+
+.insight-card{border:1px solid var(--border);border-radius:12px;
+  padding:11px 13px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start;}
+.insight-card.warn{border-color:rgba(246,195,67,0.3);background:rgba(246,195,67,0.06);}
+.insight-card.ok{border-color:rgba(72,214,138,0.3);background:rgba(72,214,138,0.06);}
+.insight-card.info{border-color:rgba(79,209,197,0.3);background:rgba(79,209,197,0.06);}
+.insight-card.alert{border-color:rgba(249,112,102,0.3);background:rgba(249,112,102,0.06);}
+.ins-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
+.ins-title{font-size:12px;font-weight:500;color:var(--text0);margin-bottom:3px;}
+.ins-desc{font-size:11px;color:var(--text2);line-height:1.6;}
+
+.action-list{display:flex;flex-direction:column;gap:5px;margin-top:6px;}
+.action-item{display:flex;align-items:flex-start;gap:7px;padding:8px 10px;
+  background:var(--bg3);border-radius:8px;font-size:11px;color:var(--text1);line-height:1.5;}
+.action-num{font-size:10px;font-weight:600;color:var(--text2);min-width:14px;flex-shrink:0;margin-top:1px;}
+
+.day-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:12px;}
+.day-card{background:var(--bg2);border:1px solid var(--border);
+  border-radius:8px;padding:7px 4px;text-align:center;}
+.day-name{font-size:9px;color:var(--text2);margin-bottom:3px;}
+.day-score{font-size:16px;font-weight:500;}
+.day-lbl{font-size:8px;margin-top:2px;}
+
+.bar-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
+.bar-label{font-size:11px;color:var(--text2);width:40px;text-align:right;flex-shrink:0;}
+.bar-track{flex:1;height:20px;background:var(--bg3);border-radius:4px;overflow:hidden;}
+.bar-fill{height:100%;border-radius:4px;display:flex;align-items:center;
+  justify-content:flex-end;padding-right:5px;}
+.bar-fill span{font-size:9px;font-weight:500;}
+
+.month-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:10px;}
+.cal-hd{font-size:9px;color:var(--text2);text-align:center;padding:3px 0;font-weight:500;}
+.cal-day{aspect-ratio:1;border-radius:6px;display:flex;align-items:center;
+  justify-content:center;font-size:10px;font-weight:500;}
+.cal-ok{background:rgba(72,214,138,0.18);color:#48d68a;}
+.cal-warn{background:rgba(246,195,67,0.18);color:#f6c343;}
+.cal-alert{background:rgba(249,112,102,0.18);color:#f97066;}
+.cal-none{background:var(--bg2);color:var(--text2);}
+.cal-empty{opacity:0;}
+
+.goal-row{display:flex;align-items:center;justify-content:space-between;
+  padding:9px 0;border-bottom:1px solid var(--border);font-size:12px;}
+.goal-row:last-child{border-bottom:none;}
+.goal-bar-wrap{width:80px;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;}
+.goal-bar{height:100%;border-radius:3px;}
+
+.empty-rep{text-align:center;padding:32px 20px;background:var(--bg2);
+  border:1px dashed var(--border2);border-radius:14px;}
+.empty-rep .er-ic{font-size:32px;margin-bottom:10px;}
+.empty-rep p{font-size:12px;color:var(--text2);line-height:1.6;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- HEADER -->
+  <div class="app-header">
+    <div class="header-logo">
+      <div class="logo-circle">🧬</div>
+      <div class="logo-text">Corti<span>Sense</span></div>
+    </div>
+    <div class="header-time" id="headerTime">—</div>
+  </div>
+
+  <!-- PAGES -->
+  <div class="pages">
+
+    <!-- ══ MEASURE (no-scroll) ══ -->
+    <div class="page active" id="page-measure">
+
+      <!-- A: Input card -->
+      <div class="input-card">
+        <div class="clock-block">
+          <div class="clock-time" id="clockTime">9:41</div>
+          <div class="clock-sub" id="clockAmpm">오전</div>
+          <div class="clock-date" id="clockDate">—</div>
+        </div>
+        <div class="divider-v"></div>
+        <div class="input-area">
+          <div class="input-lbl">색도표 값 (0.5 – 7.0)</div>
+          <div class="input-row">
+            <input class="num-input" type="number" id="colorInput"
+              min="0.5" max="7.0" step="0.5" placeholder="0.0" inputmode="decimal"/>
+            <button class="record-btn" onclick="addMeasurement()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/>
+              </svg>
+              <span>기록</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- B: Result strip -->
+      <div class="result-strip" id="resultStrip">
+        <div class="rs-header" id="rsHeader">
+          <div class="rs-icon" id="rsIcon"></div>
+          <div>
+            <div class="rs-name" id="rsName">—</div>
+            <div class="rs-crit" id="rsCrit">—</div>
+          </div>
+        </div>
+        <div class="rs-metrics">
+          <div class="rsm"><div class="rsm-l">색도표</div><div class="rsm-v" id="rv1">—</div><div class="rsm-u">값</div></div><div class="rsm"><div class="rsm-l">측정 시각</div><div class="rsm-v" id="rv2" style="font-size:13px;padding-top:3px;">—</div><div class="rsm-u"></div></div>
+          
+          
+        </div>
+      </div>
+
+      <!-- C: Date strip -->
+      <div class="date-strip" id="dateStrip"></div>
+
+      <!-- D: Chart (fills remaining height) -->
+      <div class="chart-wrap">
+        <div class="chart-top">
+          <span class="ct-lbl" id="chartLbl">일주기 코르티솔 리듬</span>
+          <span class="ct-badge">24H</span>
+        </div>
+        <div class="chart-canvas-wrap">
+          <canvas id="mainChart"></canvas>
+        </div>
+        <div class="chart-legend">
+          <div class="cl-item"><div class="cl-line" style="background:#4fd1c5;"></div>참고 상한</div>
+          <div class="cl-item"><div class="cl-line" style="background:rgba(79,209,197,0.3);border-top:1px dashed rgba(79,209,197,0.5);height:0;"></div>참고 하한</div>
+          <div class="cl-item"><div class="cl-dot" style="background:#48d68a;"></div>범위 내</div>
+          <div class="cl-item"><div class="cl-dot" style="background:#f97066;"></div>범위 초과</div>
+        </div>
+      </div>
+
+      <!-- E: History (compact, inner scroll) -->
+      <div class="history-panel" id="historyPanel">
+        <div class="empty-box">
+          <div class="em-ic">🧪</div>
+          <p>값을 입력하고 기록을 눌러주세요</p>
+        </div>
+      </div>
+
+    </div><!-- /page-measure -->
+
+    <!-- ══ GUIDE ══ -->
+    <div class="page" id="page-guide">
+      <div class="guide-wrap">
+        <div class="info-box">
+          타액 코르티솔은 <strong>일주기 리듬(Circadian Rhythm)</strong>에 따라 변동합니다. 측정값은 해당 시간대의 일주기 참고 범위와 비교해 <strong>4단계</strong>로 분류됩니다.
+        </div>
+        <div class="stage-chips" id="stageChips"></div>
+        <div id="guideDetail"></div>
+      </div>
+    </div>
+
+    <!-- ══ ABOUT ══ -->
+    <div class="page" id="page-about">
+      <div class="about-wrap">
+        <div class="about-hero">
+          <div class="ah-mark">🧬</div>
+          <div class="ah-name">Corti<span>Sense</span></div>
+          <div class="ah-ver">v1.0.0 · 타액 바이오마커 웰니스 가이드</div>
+        </div>
+        <div class="sec-label">기기 정보</div>
+        <div class="about-card">
+          <div class="about-row"><div class="ar-ic">📋</div><div><div class="ar-lbl">측정 방식</div><div class="ar-sub">타액 채취 → LFA 키트 → 색도표 비교</div></div></div>
+          <div class="about-row"><div class="ar-ic">🎯</div><div><div class="ar-lbl">측정 범위</div><div class="ar-sub">타액 바이오마커 (웰니스 참고용)</div></div></div>
+          <div class="about-row"><div class="ar-ic">🕐</div><div><div class="ar-lbl">판정 기준</div><div class="ar-sub">일주기 리듬 기반 시간대별 참고 범위</div></div></div>
+          <div class="about-row"><div class="ar-ic">⚠️</div><div><div class="ar-lbl">식약처 등록</div><div class="ar-sub">Wellness 기기 (의료기기 아님)</div></div></div>
+        </div>
+        <div class="sec-label">이용 안내</div>
+        <div class="formula-box">
+          <div class="fb-lbl">측정 방법</div>
+          <div class="fb-eq" style="font-size:12px;color:var(--text1);">색도표 값 입력 → 일주기 참고 범위 비교 → 단계 분류</div>
+          <div class="fb-note">본 서비스는 웰니스 목적의 자기 관리 도구입니다.<br>의료 진단·치료 목적으로 사용할 수 없습니다.</div>
+        </div>
+        <div class="sec-label">색도표 단계 참고표</div>
+        <div class="about-card" style="margin-bottom:16px;">
+          <div class="ref-header">
+            <span style="font-size:9px;color:var(--text2);font-weight:600;width:52px;">색도표</span>
+            <span style="font-size:9px;color:var(--text2);font-weight:600;flex:1;">하한 참고값</span>
+            <span style="font-size:9px;color:var(--text2);font-weight:600;">상한 참고값</span>
+          </div>
+          <div id="refTable"></div>
+        </div>
+        <div class="sec-label">주의사항</div>
+        <div class="info-box" style="margin-bottom:0;">
+          본 앱은 <strong>스트레스 모니터링 보조 도구</strong>입니다. 의료 진단·치료 목적으로 사용할 수 없으며, 이상 소견 지속 시 반드시 전문 의료인과 상담하세요.
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ══ REPORT ══ -->
+    <div class="page" id="page-report">
+      <div class="report-wrap">
+
+        <!-- 탭 선택 -->
+        <div class="rep-tab-row">
+          <div class="rep-tab active" onclick="switchRepTab('daily',this)">일간</div>
+          <div class="rep-tab" onclick="switchRepTab('weekly',this)">주간</div>
+          <div class="rep-tab" onclick="switchRepTab('monthly',this)">월간</div>
+        </div>
+
+        <!-- ── 일간 ── -->
+        <div class="rep-section active" id="rep-daily">
+          <div class="rep-header-card">
+            <div class="rep-date" id="rep-daily-date">—</div>
+            <div class="rep-title">일간 리포트</div>
+            <div class="rep-sub" id="rep-daily-count">측정 데이터를 불러오는 중...</div>
+            <div class="rep-badge" id="rep-daily-badge" style="background:var(--bg3);color:var(--text2);">분석 중</div>
+          </div>
+          <div class="metrics-row">
+            <div class="metric-card">
+              <div class="mc-label">최고 단계</div>
+              <div class="mc-val" id="dm-stage" style="font-size:16px;padding-top:4px;">—</div>
+              <div class="mc-unit">오늘</div>
+            </div>
+            <div class="metric-card">
+              <div class="mc-label">총 측정 횟수</div>
+              <div class="mc-val" id="dm-count">0</div>
+              <div class="mc-unit">회</div>
+            </div>
+            <div class="metric-card">
+              <div class="mc-label">첫 측정</div>
+              <div class="mc-val" id="dm-first" style="font-size:14px;padding-top:4px;">—</div>
+              <div class="mc-unit"></div>
+            </div>
+            <div class="metric-card">
+              <div class="mc-label">마지막 측정</div>
+              <div class="mc-val" id="dm-last" style="font-size:14px;padding-top:4px;">—</div>
+              <div class="mc-unit"></div>
+            </div>
+          </div>
+
+          <div class="rep-chart-card">
+            <div class="rcc-title">오늘 측정 포인트 — 일주기 참고 범위</div>
+            <canvas id="dailyChart" height="130"></canvas>
+            <div class="rcc-legend">
+              <div class="rcc-leg"><div class="rcc-sq" style="background:#4fd1c5;"></div>참고 상한</div>
+              <div class="rcc-leg"><div class="rcc-sq" style="background:rgba(79,209,197,0.3);"></div>참고 하한</div>
+              <div class="rcc-leg"><div class="rcc-sq" style="background:#f97066;"></div>측정 포인트</div>
+            </div>
+          </div>
+
+          <div class="sec-label">오늘의 인사이트</div>
+          <div id="daily-insights"></div>
+
+          <div class="sec-label">권장 행동</div>
+          <div id="daily-actions"></div>
+        </div>
+
+        <!-- ── 주간 ── -->
+        <div class="rep-section" id="rep-weekly">
+          <div class="rep-header-card">
+            <div class="rep-date" id="rep-weekly-date">—</div>
+            <div class="rep-title">주간 리포트</div>
+            <div class="rep-sub" id="rep-weekly-count">—</div>
+            <div class="rep-badge" id="rep-weekly-badge" style="background:var(--bg3);color:var(--text2);">분석 중</div>
+          </div>
+          <div class="metrics-row">
+            <div class="metric-card">
+              <div class="mc-label">주간 측정일</div>
+              <div class="mc-val" id="wm-days">0</div>
+              <div class="mc-unit">일 / 7일</div>
+            </div>
+            <div class="metric-card">
+              <div class="mc-label">총 측정 횟수</div>
+              <div class="mc-val" id="wm-count">0</div>
+              <div class="mc-unit">회</div>
+            </div>
+            <div class="metric-card">
+              <div class="mc-label">안정 단계일</div>
+              <div class="mc-val" id="wm-ok" style="color:#48d68a;">0</div>
+              <div class="mc-unit">일</div>
+            </div>
+            <div class="metric-card">
+              <div class="mc-label">주의 이상일</div>
+              <div class="mc-val" id="wm-warn" style="color:#f97066;">0</div>
+              <div class="mc-unit">일</div>
+            </div>
+          </div>
+
+          <div class="sec-label">요일별 현황</div>
+          <div class="day-grid" id="weekly-day-grid"></div>
+
+          <div class="rep-chart-card">
+            <div class="rcc-title">요일별 최고 단계 분포</div>
+            <canvas id="weeklyChart" height="120"></canvas>
+          </div>
+
+          <div class="sec-label">주간 인사이트</div>
+          <div id="weekly-insights"></div>
+        </div>
+
+        <!-- ── 월간 ── -->
+        <div class="rep-section" id="rep-monthly">
+          <div class="rep-header-card">
+            <div class="rep-date" id="rep-monthly-date">—</div>
+            <div class="rep-title">월간 리포트</div>
+            <div class="rep-sub" id="rep-monthly-count">—</div>
+            <div class="rep-badge" id="rep-monthly-badge" style="background:var(--bg3);color:var(--text2);">분석 중</div>
+          </div>
+          <div class="metrics-row">
+            <div class="metric-card">
+              <div class="mc-label">측정일 수</div>
+              <div class="mc-val" id="mm-days">0</div>
+              <div class="mc-unit">일</div>
+            </div>
+            <div class="metric-card">
+              <div class="mc-label">총 측정 횟수</div>
+              <div class="mc-val" id="mm-count">0</div>
+              <div class="mc-unit">회</div>
+            </div>
+            <div class="metric-card">
+              <div class="mc-label">안정 단계일</div>
+              <div class="mc-val" id="mm-ok" style="color:#48d68a;">0</div>
+              <div class="mc-unit">일</div>
+            </div>
+            <div class="metric-card">
+              <div class="mc-label">주의 이상일</div>
+              <div class="mc-val" id="mm-warn" style="color:#f97066;">0</div>
+              <div class="mc-unit">일</div>
+            </div>
+          </div>
+
+          <div class="sec-label">이달 스트레스 캘린더</div>
+          <div class="month-cal" id="monthly-cal"></div>
+          <div style="display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap;">
+            <div class="rcc-leg"><div class="rcc-sq cal-ok" style="width:10px;height:10px;border-radius:2px;display:inline-block;"></div><span style="font-size:10px;color:var(--text2);">안정</span></div>
+            <div class="rcc-leg"><div class="rcc-sq" style="width:10px;height:10px;border-radius:2px;background:rgba(246,195,67,0.18);display:inline-block;"></div><span style="font-size:10px;color:var(--text2);">관심/주의</span></div>
+            <div class="rcc-leg"><div class="rcc-sq" style="width:10px;height:10px;border-radius:2px;background:rgba(249,112,102,0.18);display:inline-block;"></div><span style="font-size:10px;color:var(--text2);">경계</span></div>
+          </div>
+
+          <div class="rep-chart-card">
+            <div class="rcc-title">주차별 단계 분포 추이</div>
+            <canvas id="monthlyChart" height="120"></canvas>
+          </div>
+
+          <div class="sec-label">월간 인사이트</div>
+          <div id="monthly-insights"></div>
+
+          <div class="sec-label">다음 달 목표</div>
+          <div id="monthly-goals"></div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /pages -->
+
+  <!-- BOTTOM NAV -->
+  <div class="bottom-nav">
+    <button class="nav-btn active" onclick="gotoPage('measure',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      <span>측정</span>
+    </button>
+    <button class="nav-btn" onclick="gotoPage('guide',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <span>가이드</span>
+    </button>
+    <button class="nav-btn" onclick="gotoPage('report',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+      <span>리포트</span>
+    </button>
+    <button class="nav-btn" onclick="gotoPage('about',this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 20c0-4 3.6-7 8-7s8 3 8 7"/></svg>
+      <span>정보</span>
+    </button>
+  </div>
+
+</div><!-- /app -->
+
+<script>
+/* ── DATA ── */
+const TABLE=[
+  {x:0.5,lo:22,hi:40,mid:31},{x:1.0,lo:15,hi:20,mid:17.5},
+  {x:2.0,lo:10,hi:16,mid:13},{x:3.0,lo:7.5,hi:12,mid:9.75},
+  {x:4.0,lo:5.5,hi:8,mid:6.75},{x:5.0,lo:3.5,hi:6,mid:4.75},
+  {x:6.0,lo:1.5,hi:4,mid:2.75},{x:7.0,lo:0.5,hi:2,mid:1.25},
+];
+const CIR_HI=[22,26,20,14,9,7,5,5,6,7,7,6,5,5,5,5,5,5,5,5,5,6,8,14];
+const CIR_LO=[8,10,7,4,2,1.5,1,1,1.5,2,2,1.5,1,1,1,1,1,1,1,1,1,1.5,3,6];
+const DAYS=['일','월','화','수','목','금','토'];
+const STAGES=[
+  {num:1,name:'안정 단계',short:'안정',emoji:'😌',color:'#48d68a',colorBg:'rgba(72,214,138,0.12)',colorDim:'rgba(72,214,138,0.22)',criterion:'일주기 기준값 범위 내',desc:'타액 바이오마커가 일주기 리듬에 따른 참고 범위 내에 있으며, 신체 균형이 잘 유지되고 있는 상태입니다.',symptoms:['맑은 정신과 안정적인 집중력','규칙적인 수면 패턴 유지','소화 기능 원활, 식욕 정상','감정 기복 없이 평온한 기분','면역 기능 정상적으로 작동'],reliefTitle:'건강 유지 방법',relief:[{icon:'🏃',name:'규칙적인 유산소 운동',desc:'하루 30분 걷기, 자전거, 수영으로 코르티솔 조절 능력 강화'},{icon:'🥗',name:'균형 잡힌 식단',desc:'오메가-3, 마그네슘, 비타민 C 풍부한 식품으로 부신 기능 지지'},{icon:'😴',name:'수면 위생 관리',desc:'매일 같은 시간 취침·기상, 7~8시간 수면으로 일주기 리듬 안정화'},{icon:'🧘',name:'마음챙김 루틴',desc:'하루 10분 명상이나 호흡 연습으로 HPA 축 안정 상태 유지'}]},
+  {num:2,name:'관심 단계',short:'관심',emoji:'😟',color:'#f6c343',colorBg:'rgba(246,195,67,0.12)',colorDim:'rgba(246,195,67,0.22)',criterion:'기준값 범위 소폭 초과',desc:'타액 바이오마커가 참고 범위를 소폭 벗어난 상태입니다. 일시적 업무 부담, 수면 부족 등이 영향을 줄 수 있습니다.',symptoms:['가벼운 피로감과 집중력 저하','어깨·목 주변 근육의 긴장감','평소보다 예민해진 감정 반응','잠들기까지 시간이 다소 걸림','소화 불편감 또는 식욕 변화'],reliefTitle:'즉각적 이완 방법',relief:[{icon:'🌬️',name:'4-7-8 호흡법',desc:'4초 들이쉬기 → 7초 참기 → 8초 내쉬기, 4회 반복으로 부교감 신경 활성화'},{icon:'🚶',name:'10~15분 산책',desc:'자연광을 받으며 걸으면 세로토닌 분비 촉진, 코르티솔 빠르게 정상화'},{icon:'🎵',name:'이완 음악 청취',desc:'60 BPM 이하 음악이 심박수를 낮추고 코르티솔 분비 억제'},{icon:'☕',name:'카페인 줄이기',desc:'카페인은 코르티솔을 추가 상승시킴. 캐모마일, 레몬밤 차로 대체'}]},
+  {num:3,name:'주의 단계',short:'주의',emoji:'😰',color:'#f97066',colorBg:'rgba(249,112,102,0.12)',colorDim:'rgba(249,112,102,0.22)',criterion:'기준값 범위 유의미한 초과',desc:'타액 바이오마커가 참고 범위를 유의미하게 벗어난 상태입니다. 지속적 피로나 수면 변화가 있다면 생활 습관 점검을 권장합니다.',symptoms:['두통, 뒷목 통증 등 신체 증상 출현','집중력 저하, 기억력 감퇴','과식 또는 식욕 저하','수면의 질 저하, 잦은 중간 각성','짜증, 불안감, 감정 조절 어려움','면역력 저하, 잦은 감기·구내염'],reliefTitle:'적극적 스트레스 관리',relief:[{icon:'🧘',name:'MBSR 명상',desc:'마음챙김 기반 스트레스 감소 프로그램. 8주 과정으로 코르티솔 수치 유의미하게 감소'},{icon:'🏊',name:'중강도 유산소 운동',desc:'수영, 자전거 등 45~60분 운동이 코르티솔 대사 능력 향상'},{icon:'📝',name:'스트레스 일지 작성',desc:'트리거 상황을 기록하고 패턴을 파악해 선제적으로 대응하는 인지 전략'},{icon:'💊',name:'영양 보충 고려',desc:'마그네슘 200~400mg, 아쉬와간다 추출물이 HPA 축 과활성화 억제에 도움'},{icon:'👥',name:'사회적 지지 강화',desc:'신뢰할 수 있는 가족·친구와의 대화만으로도 옥시토신 분비 → 코르티솔 감소'}]},
+  {num:4,name:'경계 단계',short:'경계',emoji:'😱',color:'#c77dff',colorBg:'rgba(199,125,255,0.12)',colorDim:'rgba(199,125,255,0.22)',criterion:'기준값 범위 크게 초과',desc:'타액 바이오마커가 참고 범위를 크게 벗어난 상태입니다. 전문가 상담 및 적극적인 자기 관리를 권장합니다.',symptoms:['극심한 피로감, 번아웃 증상','심계항진(두근거림), 혈압 상승','수면 장애: 불면 또는 과수면','체중 변화 (복부 지방 축적 경향)','심각한 집중력·판단력 저하','우울감, 무력감, 불안 발작','소화계 장애 (과민성 장증후군 유사)'],reliefTitle:'즉각 조치 및 전문 관리',relief:[{icon:'🏥',name:'전문의 상담 권고',desc:'2주 이상 지속 시 내분비내과 또는 정신건강의학과 진료를 강력 권장합니다'},{icon:'⏸️',name:'즉각적인 업무 부하 감소',desc:'현재 과제·약속을 과감히 줄이거나 위임. 완벽주의적 기준 일시 낮추기'},{icon:'🌿',name:'아답토젠 허브',desc:'아쉬와간다, 로디올라, 홍경천 등이 코르티솔 과다 분비 억제에 임상 근거 보유'},{icon:'🛁',name:'온열 요법',desc:'38~40°C 반신욕 20분이 부교감 신경계를 강하게 자극해 코르티솔 저하 유도'},{icon:'🧠',name:'인지행동치료(CBT)',desc:'만성 스트레스의 인지적 왜곡 패턴을 수정. 장기 코르티솔 조절에 가장 근거 수준 높음'},{icon:'📵',name:'디지털 디톡스',desc:'하루 2시간 이상 스마트폰·SNS 차단. 정보 과부하가 HPA 축을 지속 자극'}]},
+];
+
+/* ── UTILS ── */
+function interp(x){
+  x=Math.max(0.5,Math.min(7.0,x));
+  for(let i=0;i<TABLE.length-1;i++){
+    if(x>=TABLE[i].x&&x<=TABLE[i+1].x){
+      const t=(x-TABLE[i].x)/(TABLE[i+1].x-TABLE[i].x);
+      return{mid:+(TABLE[i].mid+t*(TABLE[i+1].mid-TABLE[i].mid)).toFixed(2),
+             lo:+(TABLE[i].lo+t*(TABLE[i+1].lo-TABLE[i].lo)).toFixed(1),
+             hi:+(TABLE[i].hi+t*(TABLE[i+1].hi-TABLE[i].hi)).toFixed(1)};
+    }
+  }
+  return TABLE[TABLE.length-1];
+}
+function classify(c,h){const hi=CIR_HI[h];if(c<=hi)return 0;if(c<=hi*1.2)return 1;if(c<=hi*1.5)return 2;return 3;}
+function toDateKey(d){return`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;}
+function todayKey(){return toDateKey(new Date());}
+function fmtTab(k){const t=todayKey(),y=toDateKey(new Date(Date.now()-86400000));if(k===t)return'오늘';if(k===y)return'어제';const[,m,d]=k.split('-');return`${+m}/${+d}`;}
+function fmtFull(k){const[yr,m,d]=k.split('-');const dt=new Date(+yr,+m-1,+d);return`${+m}월 ${+d}일 (${DAYS[dt.getDay()]})`;}
+
+/* ── STORAGE ── */
+const SK='cortisense_v2';
+function loadAll(){try{return JSON.parse(localStorage.getItem(SK))||{};}catch{return{};}}
+function saveAll(d){localStorage.setItem(SK,JSON.stringify(d));}
+function getDay(k){return loadAll()[k]||[];}
+function saveEntry(e){const a=loadAll();if(!a[e.dateKey])a[e.dateKey]=[];a[e.dateKey].push(e);saveAll(a);}
+
+/* ── STATE ── */
+let selDate=todayKey(), myChart=null;
+
+/* ── CLOCK ── */
+function tick(){
+  const n=new Date(),h=n.getHours(),m=n.getMinutes();
+  const ap=h<12?'오전':'오후',hh=h%12||12,mm=String(m).padStart(2,'0');
+  document.getElementById('clockTime').textContent=`${hh}:${mm}`;
+  document.getElementById('clockAmpm').textContent=ap;
+  document.getElementById('clockDate').textContent=`${n.getMonth()+1}월 ${n.getDate()}일 (${DAYS[n.getDay()]})`;
+  document.getElementById('headerTime').textContent=`${hh}:${mm}`;
+}
+setInterval(tick,1000);tick();
+
+/* ── NAV ── */
+function gotoPage(name,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  btn.classList.add('active');
+}
+
+/* ── DATE TABS ── */
+function buildDateTabs(){
+  const all=loadAll(),today=todayKey();
+  let keys=[...new Set([today,...Object.keys(all)])].sort().reverse().slice(0,14);
+  const strip=document.getElementById('dateStrip');
+  strip.innerHTML='';
+  keys.forEach(k=>{
+    const entries=all[k]||[];
+    const tab=document.createElement('div');
+    tab.className='date-tab'+(k===selDate?' active':'');
+    tab.innerHTML=fmtTab(k)+(entries.length?`<span class="dt-n">${entries.length}</span>`:'');
+    tab.onclick=()=>selectDate(k);
+    strip.appendChild(tab);
+  });
+}
+function selectDate(k){
+  selDate=k;
+  buildDateTabs();
+  updateChart();
+  renderHistory();
+  document.getElementById('chartLbl').textContent=k===todayKey()?'일주기 코르티솔 리듬':`${fmtFull(k)} 코르티솔`;
+}
+
+/* ── ADD MEASUREMENT ── */
+function addMeasurement(){
+  const inp=document.getElementById('colorInput');
+  const val=parseFloat(inp.value);
+  if(isNaN(val)||val<0.5||val>7.0){
+    inp.classList.add('error');setTimeout(()=>inp.classList.remove('error'),900);return;
+  }
+  const now=new Date(),h=now.getHours(),mn=now.getMinutes();
+  const v=interp(val),si=classify(v.mid,h),s=STAGES[si];
+  const entry={val,conc:v.mid,lo:v.lo,hi:v.hi,hour:h,min:mn,si,
+    dateKey:todayKey(),ts:now.getTime(),
+    stageColor:s.color,stageBg:s.colorBg,stageDim:s.colorDim,
+    stageName:s.name,stageShort:s.short,stageNum:s.num,
+    stageCrit:s.criterion,stageEmoji:s.emoji};
+  saveEntry(entry);
+  selDate=todayKey();
+  buildDateTabs();showResult(entry);updateChart();renderHistory();
+  inp.value='';
+}
+
+/* ── RESULT STRIP ── */
+function showResult(e){
+  const strip=document.getElementById('resultStrip');
+  strip.style.display='block';
+  const hdr=document.getElementById('rsHeader');
+  hdr.style.background=e.stageBg;
+  hdr.style.borderBottom=`1px solid ${e.stageColor}33`;
+  document.getElementById('rsIcon').textContent=e.stageEmoji;
+  document.getElementById('rsName').textContent=`단계 ${e.stageNum} · ${e.stageName}`;
+  document.getElementById('rsName').style.color=e.stageColor;
+  document.getElementById('rsCrit').textContent=e.stageCrit;
+  document.getElementById('rv1').textContent=e.val.toFixed(1);
+  const _h=e.hour%12||12,_ap=e.hour<12?'오전':'오후';document.getElementById('rv2').textContent=`${_ap} ${_h}:${String(e.min).padStart(2,'0')}`;
+  
+  strip.style.borderColor=e.stageColor+'44';
+}
+
+/* ── CHART ── */
+function buildChart(){
+  const ctx=document.getElementById('mainChart').getContext('2d');
+  myChart=new Chart(ctx,{
+    type:'line',
+    data:{
+      labels:Array.from({length:24},(_,i)=>i),
+      datasets:[
+        {data:CIR_HI,borderColor:'#4fd1c5',backgroundColor:'rgba(79,209,197,0.07)',borderWidth:1.5,fill:'+1',pointRadius:0,tension:0.4,order:3},
+        {data:CIR_LO,borderColor:'rgba(79,209,197,0.28)',borderDash:[4,3],backgroundColor:'transparent',borderWidth:1,fill:false,pointRadius:0,tension:0.4,order:3},
+        {data:[],type:'scatter',pointRadius:7,pointHoverRadius:9,borderWidth:2,borderColor:'#080c14',backgroundColor:[],order:1}
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,animation:{duration:250},
+      plugins:{legend:{display:false},tooltip:{
+        backgroundColor:'rgba(10,15,28,0.96)',borderColor:'rgba(255,255,255,0.08)',borderWidth:1,
+        titleColor:'#f0f4ff',bodyColor:'#a8b5cc',padding:9,cornerRadius:9,
+        callbacks:{
+          title:items=>{
+            const i=items[0];
+            if(i.datasetIndex===2){
+              const m=getDay(selDate).find(m=>Math.abs(m.hour+m.min/60-i.parsed.x)<0.12);
+              if(m){const hh=m.hour%12||12,ap=m.hour<12?'오전':'오후';return`${ap} ${hh}:${String(m.min).padStart(2,'0')}`;}
+            }
+            return i.label+'시';
+          },
+          label:item=>{
+            if(item.datasetIndex===2){
+              const m=getDay(selDate).find(m=>Math.abs(m.hour+m.min/60-item.parsed.x)<0.12);
+              if(m)return[`색도표: ${m.val.toFixed(1)}`,`${m.stageName}`];
+            }
+            return`참고값: ${item.parsed.y}`;
+          }
+        }
+      }},
+      scales:{
+        x:{type:'linear',min:0,max:23,grid:{color:'rgba(255,255,255,0.04)'},
+           ticks:{color:'#5e7090',font:{size:9,family:'DM Mono'},stepSize:4,callback:v=>v+'시'}},
+        y:{min:0,max:32,grid:{color:'rgba(255,255,255,0.04)'},
+           ticks:{color:'#5e7090',font:{size:9,family:'DM Mono'},callback:v=>v}}
+      }
+    }
+  });
+}
+function updateChart(){
+  if(!myChart)return;
+  const entries=getDay(selDate);
+  myChart.data.datasets[2].data=entries.map(m=>({x:m.hour+m.min/60,y:m.conc}));
+  myChart.data.datasets[2].backgroundColor=entries.map(m=>m.stageColor);
+  myChart.update();
+}
+
+/* ── HISTORY ── */
+function renderHistory(){
+  const panel=document.getElementById('historyPanel');
+  const entries=getDay(selDate);
+  if(!entries.length){
+    panel.innerHTML='<div class="empty-box"><div class="em-ic">🧪</div><p>이 날의 측정 기록이 없습니다</p></div>';
+    return;
+  }
+  const ul=document.createElement('div');
+  ul.className='history-list';
+  [...entries].reverse().forEach(e=>{
+    const hh=e.hour%12||12,ap=e.hour<12?'오전':'오후';
+    const d=document.createElement('div');
+    d.className='hi-item';
+    d.innerHTML=`<div class="hi-bar" style="background:${e.stageColor};"></div>
+      <div class="hi-time">${ap} ${hh}:${String(e.min).padStart(2,'0')}</div>
+      <div class="hi-cv">색도표 ${e.val.toFixed(1)}</div>
+      <div class="hi-conc" style="color:${e.stageColor};font-weight:500;">${e.stageName}</div>
+      <div class="hi-badge" style="background:${e.stageBg};color:${e.stageColor};">${e.stageShort}</div>`;
+    ul.appendChild(d);
+  });
+  panel.innerHTML='';panel.appendChild(ul);
+}
+
+/* ── SWIPE ── */
+(()=>{
+  let sx=0,sy=0;
+  const el=document.getElementById('page-measure');
+  el.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
+  el.addEventListener('touchend',e=>{
+    const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
+    if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5){
+      const all=loadAll(),today=todayKey();
+      const keys=[...new Set([today,...Object.keys(all)])].sort().reverse().slice(0,14);
+      const idx=keys.indexOf(selDate);
+      if(dx<0&&idx<keys.length-1)selectDate(keys[idx+1]);
+      if(dx>0&&idx>0)selectDate(keys[idx-1]);
+    }
+  },{passive:true});
+})();
+
+/* ── GUIDE ── */
+function buildGuide(){
+  const chips=document.getElementById('stageChips');
+  STAGES.forEach((s,i)=>{
+    const c=document.createElement('div');
+    c.className='schip'+(i===0?' active':'');c.id='chip-'+i;
+    if(i===0){c.style.borderColor=s.color;c.style.background=s.colorBg;}
+    c.onclick=()=>{
+      STAGES.forEach((_,j)=>{
+        const ch=document.getElementById('chip-'+j);
+        ch.classList.toggle('active',j===i);
+        ch.style.borderColor=j===i?STAGES[j].color:'rgba(255,255,255,0.07)';
+        ch.style.background=j===i?STAGES[j].colorBg:'var(--bg2)';
+      });
+      renderGuideDetail(i);
+    };
+    c.innerHTML=`<div class="schip-num" style="color:${s.color}">단계 ${s.num}</div><div class="schip-name">${s.short}</div><div class="schip-crit">${s.criterion}</div>`;
+    chips.appendChild(c);
+  });
+  renderGuideDetail(0);
+}
+function renderGuideDetail(idx){
+  const s=STAGES[idx];
+  document.getElementById('guideDetail').innerHTML=`
+    <div class="detail-card">
+      <div class="dc-header" style="background:${s.colorBg};">
+        <div class="dc-icon" style="background:${s.colorDim};">${s.emoji}</div>
+        <div><div class="dc-title" style="color:${s.color};">단계 ${s.num} · ${s.name}</div><div class="dc-sub" style="color:${s.color};">${s.criterion}</div></div>
+      </div>
+      <div class="dc-desc">${s.desc}</div>
+      <div class="dc-section">
+        <div class="dcs-label">주요 증상</div>
+        ${s.symptoms.map(sym=>`<div class="sym-item"><div class="sym-pip" style="background:${s.color};"></div><span>${sym}</span></div>`).join('')}
+      </div>
+      <div class="dc-section">
+        <div class="dcs-label">${s.reliefTitle}</div>
+        <div class="relief-items">
+          ${s.relief.map(r=>`<div class="ri-item"><div class="ri-icon" style="background:${s.colorBg};">${r.icon}</div><div><div class="ri-name">${r.name}</div><div class="ri-desc">${r.desc}</div></div></div>`).join('')}
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ── ABOUT ── */
+function buildRefTable(){
+  const w=document.getElementById('refTable');
+  TABLE.forEach(r=>{
+    const d=document.createElement('div');d.className='ref-row';
+    d.innerHTML=`<span class="rcol">${r.x.toFixed(1)}</span><span class="rlcol">${r.lo}</span><span class="rhcol">${r.hi}</span>`;
+    w.appendChild(d);
+  });
+}
+
+/* ── iOS hint ── */
+if(/iphone|ipad|ipod/i.test(navigator.userAgent)&&!window.navigator.standalone){
+  // subtle toast shown once
+}
+
+
+
+/* ══ REPORT ══ */
+let repDailyChart=null, repWeeklyChart=null, repMonthlyChart=null;
+const DAYS_KO=['일','월','화','수','목','금','토'];
+const STAGE_COLORS=['#48d68a','#f6c343','#f97066','#c77dff'];
+const STAGE_NAMES=['안정 단계','관심 단계','주의 단계','경계 단계'];
+
+function switchRepTab(id, btn){
+  document.querySelectorAll('.rep-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.rep-section').forEach(s=>s.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('rep-'+id).classList.add('active');
+  if(id==='daily') buildDailyReport();
+  else if(id==='weekly') buildWeeklyReport();
+  else buildMonthlyReport();
+}
+
+/* ── 유틸 ── */
+function getAllData(){
+  const all=loadAll();
+  return all;
+}
+function getWeekKeys(){
+  const keys=[];
+  for(let i=6;i>=0;i--){
+    const d=new Date(Date.now()-i*86400000);
+    keys.push(toDateKey(d));
+  }
+  return keys;
+}
+function getMonthKeys(){
+  const now=new Date();
+  const year=now.getFullYear(),month=now.getMonth();
+  const days=new Date(year,month+1,0).getDate();
+  const keys=[];
+  for(let d=1;d<=days;d++){
+    const dt=new Date(year,month,d);
+    keys.push(toDateKey(dt));
+  }
+  return keys;
+}
+function stageSummary(entries){
+  if(!entries||!entries.length) return -1;
+  return Math.max(...entries.map(e=>e.si||0));
+}
+function badgeStyle(si){
+  if(si<0) return {bg:'var(--bg3)',color:'var(--text2)',text:'데이터 없음'};
+  const colors=['rgba(72,214,138,0.15)','rgba(246,195,67,0.15)','rgba(249,112,102,0.15)','rgba(199,125,255,0.15)'];
+  const tc=['#48d68a','#f6c343','#f97066','#c77dff'];
+  return {bg:colors[si],color:tc[si],text:STAGE_NAMES[si]};
+}
+
+/* ── 일간 리포트 ── */
+function buildDailyReport(){
+  const today=todayKey();
+  const now=new Date();
+  const entries=getDay(today);
+
+  // 날짜
+  document.getElementById('rep-daily-date').textContent=
+    `${now.getMonth()+1}월 ${now.getDate()}일 (${DAYS_KO[now.getDay()]}) · 오늘`;
+  document.getElementById('rep-daily-count').textContent=
+    `측정 ${entries.length}회`;
+
+  if(!entries.length){
+    document.getElementById('dm-stage').textContent='—';
+    document.getElementById('dm-count').textContent='0';
+    document.getElementById('dm-first').textContent='—';
+    document.getElementById('dm-last').textContent='—';
+    document.getElementById('rep-daily-badge').textContent='측정 없음';
+    document.getElementById('rep-daily-badge').style.cssText='background:var(--bg3);color:var(--text2);';
+    document.getElementById('daily-insights').innerHTML=
+      '<div class="empty-rep"><div class="er-ic">📋</div><p>오늘 측정 기록이 없습니다.<br>색도표 값을 입력하고 기록해보세요.</p></div>';
+    document.getElementById('daily-actions').innerHTML='';
+    buildDailyChart([]);
+    return;
+  }
+
+  const maxSi=Math.max(...entries.map(e=>e.si||0));
+  const badge=badgeStyle(maxSi);
+  const el=document.getElementById('rep-daily-badge');
+  el.textContent=badge.text;
+  el.style.cssText=`background:${badge.bg};color:${badge.color};`;
+
+  // 메트릭
+  document.getElementById('dm-stage').textContent=STAGE_NAMES[maxSi];
+  document.getElementById('dm-stage').style.color=STAGE_COLORS[maxSi];
+  document.getElementById('dm-count').textContent=entries.length;
+  const fmt=e=>{const h=e.hour%12||12,ap=e.hour<12?'오전':'오후';return`${ap} ${h}:${String(e.min).padStart(2,'0')}`;};
+  document.getElementById('dm-first').textContent=fmt(entries[0]);
+  document.getElementById('dm-last').textContent=fmt(entries[entries.length-1]);
+
+  buildDailyChart(entries);
+
+  // 인사이트
+  const insights=[];
+  if(maxSi===0) insights.push({type:'ok',icon:'😌',title:'안정 단계 유지',desc:'오늘 하루 타액 바이오마커가 참고 범위 내에서 안정적으로 유지됐습니다.'});
+  if(maxSi===1) insights.push({type:'warn',icon:'💛',title:'관심 단계 감지',desc:'일부 측정에서 참고 범위를 소폭 벗어났습니다. 충분한 휴식을 취해보세요.'});
+  if(maxSi===2) insights.push({type:'alert',icon:'🔶',title:'주의 단계 감지',desc:'참고 범위를 유의미하게 벗어난 측정이 있었습니다. 적극적인 이완 활동을 권장합니다.'});
+  if(maxSi===3) insights.push({type:'alert',icon:'🔴',title:'경계 단계 감지',desc:'참고 범위를 크게 벗어난 측정이 있었습니다. 전문가 상담을 고려해보세요.'});
+
+  const peakEntry=entries.reduce((a,b)=>(a.si||0)>(b.si||0)?a:b);
+  if(peakEntry.si>0){
+    const h=peakEntry.hour%12||12,ap=peakEntry.hour<12?'오전':'오후';
+    insights.push({type:'info',icon:'🕐',title:`최고 단계: ${ap} ${h}시`,desc:`이 시간대에 가장 높은 단계가 측정됐습니다. 해당 시간대 전후 활동을 점검해보세요.`});
+  }
+  if(entries.length>=3) insights.push({type:'ok',icon:'📊',title:'측정 성실도 우수',desc:`오늘 ${entries.length}회 측정하셨습니다. 꾸준한 측정이 패턴 파악에 도움이 됩니다.`});
+
+  document.getElementById('daily-insights').innerHTML=insights.map(i=>
+    `<div class="insight-card ${i.type}"><div class="ins-icon">${i.icon}</div><div><div class="ins-title">${i.title}</div><div class="ins-desc">${i.desc}</div></div></div>`
+  ).join('');
+
+  // 권장 행동
+  const actions=maxSi===0
+    ? ['규칙적인 수면 패턴을 유지하세요 (7~8시간)','균형 잡힌 식사와 충분한 수분 섭취를 권장합니다','현재 상태를 유지하는 생활 루틴을 지속하세요']
+    : maxSi===1
+    ? ['하루 10분 복식 호흡 또는 명상을 실천해보세요','카페인 섭취를 줄이고 캐모마일 차로 대체해보세요','취침 전 스마트폰 사용을 1시간 이상 제한하세요']
+    : maxSi===2
+    ? ['오늘 20분 이상 유산소 운동(걷기, 자전거 등)을 권장합니다','업무 중 45분마다 5분 휴식을 취해보세요','신뢰할 수 있는 사람과 대화 시간을 가져보세요']
+    : ['무리한 일정을 줄이고 충분한 휴식을 최우선으로 하세요','전문가 상담을 적극적으로 고려해보세요','내일 같은 시간대 재측정하여 변화를 확인하세요'];
+
+  document.getElementById('daily-actions').innerHTML=
+    `<div class="insight-card info"><div class="ins-icon">💡</div><div class="action-list">${
+      actions.map((a,i)=>`<div class="action-item"><span class="action-num">${i+1}</span>${a}</div>`).join('')
+    }</div></div>`;
+}
+
+function buildDailyChart(entries){
+  const ctx=document.getElementById('dailyChart');
+  if(!ctx) return;
+  if(repDailyChart){repDailyChart.destroy();repDailyChart=null;}
+  const pts=entries.map(e=>({x:e.hour+e.min/60,y:e.conc||e.val*3}));
+  repDailyChart=new Chart(ctx,{
+    type:'line',
+    data:{
+      labels:Array.from({length:24},(_,i)=>i),
+      datasets:[
+        {data:CIR_HI,borderColor:'#4fd1c5',backgroundColor:'rgba(79,209,197,0.07)',borderWidth:1.5,fill:'+1',pointRadius:0,tension:0.4,order:3},
+        {data:CIR_LO,borderColor:'rgba(79,209,197,0.28)',borderDash:[4,3],borderWidth:1,fill:false,pointRadius:0,tension:0.4,order:3},
+        {data:pts,type:'scatter',pointRadius:7,pointHoverRadius:9,borderWidth:2,
+          borderColor:'#080c14',backgroundColor:entries.map(e=>STAGE_COLORS[e.si||0]),order:1}
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:250},
+      plugins:{legend:{display:false},tooltip:{
+        backgroundColor:'rgba(10,15,28,0.96)',borderColor:'rgba(255,255,255,0.08)',borderWidth:1,
+        titleColor:'#f0f4ff',bodyColor:'#a8b5cc',padding:8,cornerRadius:8,
+        callbacks:{
+          title:items=>{const i=items[0];if(i.datasetIndex===2&&entries[i.dataIndex]){const e=entries[i.dataIndex];const h=e.hour%12||12,ap=e.hour<12?'오전':'오후';return`${ap} ${h}:${String(e.min).padStart(2,'0')}`;}return i.label+'시';},
+          label:item=>{if(item.datasetIndex===2&&entries[item.dataIndex]){const e=entries[item.dataIndex];return[`색도표: ${e.val.toFixed(1)}`,STAGE_NAMES[e.si||0]];}return`참고값: ${item.parsed.y}`;}
+        }
+      }},
+      scales:{
+        x:{type:'linear',min:0,max:23,grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#5e7090',font:{size:9},stepSize:4,callback:v=>v+'시'}},
+        y:{min:0,max:32,grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#5e7090',font:{size:9},callback:v=>v}}
+      }}
+  });
+}
+
+/* ── 주간 리포트 ── */
+function buildWeeklyReport(){
+  const weekKeys=getWeekKeys();
+  const all=getAllData();
+  const now=new Date();
+
+  const startDate=new Date(Date.now()-6*86400000);
+  document.getElementById('rep-weekly-date').textContent=
+    `${startDate.getMonth()+1}/${startDate.getDate()} ~ ${now.getMonth()+1}/${now.getDate()}`;
+
+  let totalCount=0, okDays=0, warnDays=0, measuredDays=0;
+  const dayStages=[];
+
+  weekKeys.forEach(k=>{
+    const entries=all[k]||[];
+    if(entries.length>0) measuredDays++;
+    totalCount+=entries.length;
+    const si=stageSummary(entries);
+    dayStages.push(si);
+    if(si===0) okDays++;
+    else if(si>=2) warnDays++;
+  });
+
+  document.getElementById('rep-weekly-count').textContent=`총 측정 ${totalCount}회 · ${measuredDays}일 측정`;
+  document.getElementById('wm-days').textContent=measuredDays;
+  document.getElementById('wm-count').textContent=totalCount;
+  document.getElementById('wm-ok').textContent=okDays;
+  document.getElementById('wm-warn').textContent=warnDays;
+
+  const maxSi=Math.max(...dayStages.filter(s=>s>=0),0);
+  const badge=badgeStyle(measuredDays===0?-1:maxSi);
+  const el=document.getElementById('rep-weekly-badge');
+  el.textContent=measuredDays===0?'데이터 없음':badge.text;
+  el.style.cssText=`background:${badge.bg};color:${badge.color};`;
+
+  // 요일 카드
+  const grid=document.getElementById('weekly-day-grid');
+  grid.innerHTML='';
+  weekKeys.forEach((k,i)=>{
+    const si=dayStages[i];
+    const dt=new Date(Date.parse(k));
+    const color=si<0?'var(--text2)':STAGE_COLORS[si];
+    const label=si<0?'—':STAGE_NAMES[si].replace(' 단계','');
+    grid.innerHTML+=`<div class="day-card">
+      <div class="day-name">${DAYS_KO[dt.getDay()]}</div>
+      <div class="day-score" style="color:${color};font-size:14px;">${label}</div>
+      <div class="day-lbl" style="color:${color};">${(all[k]||[]).length}회</div>
+    </div>`;
+  });
+
+  buildWeeklyChart(dayStages, weekKeys);
+
+  // 인사이트
+  const insights=[];
+  if(measuredDays===0){
+    insights.push({type:'info',icon:'📋',title:'이번 주 데이터 없음',desc:'이번 주 측정 기록이 없습니다. 꾸준한 측정이 패턴 파악에 도움됩니다.'});
+  } else {
+    if(okDays>=5) insights.push({type:'ok',icon:'🌟',title:'이번 주 안정 유지 우수',desc:`${okDays}일이 안정 단계였습니다. 현재 생활 패턴을 유지하세요.`});
+    if(warnDays>=3) insights.push({type:'alert',icon:'⚠️',title:'주의 이상 단계 빈번',desc:`${warnDays}일에서 주의 이상 단계가 감지됐습니다. 생활 습관 점검을 권장합니다.`});
+    if(measuredDays<4) insights.push({type:'warn',icon:'📅',title:'측정 빈도 부족',desc:`이번 주 ${measuredDays}일만 측정하셨습니다. 매일 1회 이상 측정을 권장합니다.`});
+    if(totalCount>0) insights.push({type:'info',icon:'📊',title:`주간 평균 ${(totalCount/measuredDays).toFixed(1)}회/일 측정`,desc:'꾸준한 측정이 더 정확한 패턴 분석을 가능하게 합니다.'});
+  }
+  document.getElementById('weekly-insights').innerHTML=insights.map(i=>
+    `<div class="insight-card ${i.type}"><div class="ins-icon">${i.icon}</div><div><div class="ins-title">${i.title}</div><div class="ins-desc">${i.desc}</div></div></div>`
+  ).join('');
+}
+
+function buildWeeklyChart(dayStages, weekKeys){
+  const ctx=document.getElementById('weeklyChart');
+  if(!ctx) return;
+  if(repWeeklyChart){repWeeklyChart.destroy();repWeeklyChart=null;}
+  const labels=weekKeys.map(k=>{const dt=new Date(Date.parse(k));return DAYS_KO[dt.getDay()];});
+  const colors=dayStages.map(s=>s<0?'var(--bg3)':STAGE_COLORS[s]);
+  const data=dayStages.map(s=>s<0?0:s+1);
+  repWeeklyChart=new Chart(ctx,{
+    type:'bar',
+    data:{labels,datasets:[{data,backgroundColor:colors,borderRadius:6,barThickness:28}]},
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:250},
+      plugins:{legend:{display:false},tooltip:{
+        backgroundColor:'rgba(10,15,28,0.96)',borderColor:'rgba(255,255,255,0.08)',borderWidth:1,
+        titleColor:'#f0f4ff',bodyColor:'#a8b5cc',padding:8,cornerRadius:8,
+        callbacks:{label:item=>item.raw===0?'측정 없음':STAGE_NAMES[item.raw-1]}
+      }},
+      scales:{
+        x:{grid:{display:false},ticks:{color:'#5e7090',font:{size:10}}},
+        y:{min:0,max:4,grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#5e7090',font:{size:9},
+          callback:v=>['','안정','관심','주의','경계'][v]||''}}
+      }}
+  });
+}
+
+/* ── 월간 리포트 ── */
+function buildMonthlyReport(){
+  const now=new Date();
+  const monthKeys=getMonthKeys();
+  const all=getAllData();
+
+  document.getElementById('rep-monthly-date').textContent=
+    `${now.getFullYear()}년 ${now.getMonth()+1}월`;
+
+  let totalCount=0, okDays=0, warnDays=0, measuredDays=0;
+  const dayStages={};
+
+  monthKeys.forEach(k=>{
+    const entries=all[k]||[];
+    if(entries.length>0) measuredDays++;
+    totalCount+=entries.length;
+    const si=stageSummary(entries);
+    dayStages[k]=si;
+    if(si===0) okDays++;
+    else if(si>=2) warnDays++;
+  });
+
+  document.getElementById('rep-monthly-count').textContent=`총 측정 ${totalCount}회 · ${measuredDays}일 측정`;
+  document.getElementById('mm-days').textContent=measuredDays;
+  document.getElementById('mm-count').textContent=totalCount;
+  document.getElementById('mm-ok').textContent=okDays;
+  document.getElementById('mm-warn').textContent=warnDays;
+
+  const allSi=Object.values(dayStages).filter(s=>s>=0);
+  const maxSi=allSi.length?Math.max(...allSi):0;
+  const badge=badgeStyle(measuredDays===0?-1:maxSi);
+  const el=document.getElementById('rep-monthly-badge');
+  el.textContent=measuredDays===0?'데이터 없음':`이달 최고: ${badge.text}`;
+  el.style.cssText=`background:${badge.bg};color:${badge.color};`;
+
+  // 캘린더
+  buildMonthlyCal(now, monthKeys, dayStages);
+
+  // 주차별 차트
+  buildMonthlyChart(monthKeys, all);
+
+  // 인사이트
+  const insights=[];
+  if(measuredDays===0){
+    insights.push({type:'info',icon:'📋',title:'이달 데이터 없음',desc:'이달 측정 기록이 없습니다.'});
+  } else {
+    const rate=(measuredDays/monthKeys.length*100).toFixed(0);
+    insights.push({type:rate>=70?'ok':'warn',icon:'📅',title:`측정 성실도 ${rate}%`,desc:`이달 ${monthKeys.length}일 중 ${measuredDays}일 측정하셨습니다.`});
+    if(okDays>warnDays) insights.push({type:'ok',icon:'🌟',title:'이달 전반적 안정',desc:`안정 단계일(${okDays}일)이 주의 이상일(${warnDays}일)보다 많았습니다.`});
+    else if(warnDays>okDays) insights.push({type:'alert',icon:'⚠️',title:'주의 이상 단계 빈번',desc:`주의 이상일(${warnDays}일)이 안정일(${okDays}일)보다 많았습니다. 생활 습관 개선을 권장합니다.`});
+  }
+  document.getElementById('monthly-insights').innerHTML=insights.map(i=>
+    `<div class="insight-card ${i.type}"><div class="ins-icon">${i.icon}</div><div><div class="ins-title">${i.title}</div><div class="ins-desc">${i.desc}</div></div></div>`
+  ).join('');
+
+  // 목표
+  const goals=[
+    {label:'매일 측정',current:measuredDays,total:monthKeys.length,color:'#4fd1c5'},
+    {label:'안정 단계',current:okDays,total:measuredDays||1,color:'#48d68a'},
+    {label:'경계 이하',current:Math.max(0,measuredDays-warnDays),total:measuredDays||1,color:'#f6c343'},
+  ];
+  document.getElementById('monthly-goals').innerHTML=
+    `<div class="insight-card info"><div style="width:100%;">${goals.map(g=>{
+      const pct=Math.min(100,Math.round(g.current/g.total*100));
+      return`<div class="goal-row"><span>${g.label}</span><span style="color:var(--text2);font-size:11px;">${g.current}/${g.total}</span><div class="goal-bar-wrap"><div class="goal-bar" style="width:${pct}%;background:${g.color};"></div></div></div>`;
+    }).join('')}</div></div>`;
+}
+
+function buildMonthlyCal(now, monthKeys, dayStages){
+  const cal=document.getElementById('monthly-cal');
+  cal.innerHTML='';
+  ['월','화','수','목','금','토','일'].forEach(d=>{cal.innerHTML+=`<div class="cal-hd">${d}</div>`;});
+  const firstDay=new Date(now.getFullYear(),now.getMonth(),1).getDay();
+  const offset=(firstDay+6)%7; // 월요일 시작
+  for(let i=0;i<offset;i++) cal.innerHTML+=`<div class="cal-empty"></div>`;
+  monthKeys.forEach(k=>{
+    const si=dayStages[k];
+    const day=parseInt(k.split('-')[2]);
+    let cls='cal-none';
+    if(si===0) cls='cal-ok';
+    else if(si===1||si===2) cls='cal-warn';
+    else if(si===3) cls='cal-alert';
+    const isToday=k===todayKey();
+    cal.innerHTML+=`<div class="cal-day ${cls}" style="${isToday?'outline:1px solid var(--accent);':''}">${day}</div>`;
+  });
+}
+
+function buildMonthlyChart(monthKeys, all){
+  const ctx=document.getElementById('monthlyChart');
+  if(!ctx) return;
+  if(repMonthlyChart){repMonthlyChart.destroy();repMonthlyChart=null;}
+
+  // 주차별 집계
+  const weeks=[];
+  for(let w=0;w<5;w++){
+    const wkeys=monthKeys.slice(w*7,(w+1)*7);
+    if(!wkeys.length) continue;
+    const counts=[0,0,0,0];
+    wkeys.forEach(k=>{
+      const entries=all[k]||[];
+      entries.forEach(e=>{ if(e.si>=0&&e.si<=3) counts[e.si]++; });
+    });
+    weeks.push({label:`${w+1}주`,counts});
+  }
+
+  repMonthlyChart=new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:weeks.map(w=>w.label),
+      datasets:[
+        {label:'안정',data:weeks.map(w=>w.counts[0]),backgroundColor:'rgba(72,214,138,0.7)',borderRadius:3},
+        {label:'관심',data:weeks.map(w=>w.counts[1]),backgroundColor:'rgba(246,195,67,0.7)',borderRadius:3},
+        {label:'주의',data:weeks.map(w=>w.counts[2]),backgroundColor:'rgba(249,112,102,0.7)',borderRadius:3},
+        {label:'경계',data:weeks.map(w=>w.counts[3]),backgroundColor:'rgba(199,125,255,0.7)',borderRadius:3},
+      ]
+    },
+    options:{responsive:true,maintainAspectRatio:false,animation:{duration:250},
+      plugins:{legend:{display:true,labels:{color:'#5e7090',font:{size:9},boxWidth:10}}},
+      scales:{
+        x:{stacked:true,grid:{display:false},ticks:{color:'#5e7090',font:{size:10}}},
+        y:{stacked:true,grid:{color:'rgba(255,255,255,0.04)'},ticks:{color:'#5e7090',font:{size:9}}}
+      }}
+  });
+}
+
+/* 리포트 페이지 진입 시 자동 로드 */
+const _origGotoPage = gotoPage;
+function gotoPage(name, btn){
+  _origGotoPage(name, btn);
+  if(name==='report'){
+    // 현재 활성 탭 리포트 빌드
+    const activeTab=document.querySelector('.rep-tab.active');
+    if(activeTab){
+      const id=activeTab.textContent==='일간'?'daily':activeTab.textContent==='주간'?'weekly':'monthly';
+      if(id==='daily') buildDailyReport();
+      else if(id==='weekly') buildWeeklyReport();
+      else buildMonthlyReport();
+    } else {
+      buildDailyReport();
+    }
+  }
+}
+
+/* ── SW ── */
+if('serviceWorker' in navigator)navigator.serviceWorker.register('./sw.js').catch(()=>{});
+
+/* ── INIT ── */
+buildDateTabs();selectDate(todayKey());
+setTimeout(buildChart,80);setTimeout(updateChart,160);
+buildGuide();buildRefTable();
+const te=getDay(todayKey());if(te.length)showResult(te[te.length-1]);
+</script>
+</body>
+</html>
