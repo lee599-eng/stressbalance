@@ -1,7 +1,7 @@
 {
-  "name": "CortiSense — 코르티솔 스트레스 모니터",
-  "short_name": "CortiSense",
-  "description": "타액 코르티솔 색도표 기반 스트레스 모니터링 앱",
+  "name": "StressBalance — 타액 바이오마커 웰니스",
+  "short_name": "StressBalance",
+  "description": "타액 바이오마커 기반 웰니스 모니터링 앱",
   "start_url": "./index.html",
   "display": "standalone",
   "orientation": "portrait",
