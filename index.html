@@ -264,7 +264,7 @@ html,body{height:100%;background:var(--bg0);font-family:'DM Sans',system-ui,sans
 .rep-header-card::after{content:'';position:absolute;top:-30px;right:-30px;
   width:120px;height:120px;background:radial-gradient(circle,var(--accent-glow) 0%,transparent 70%);
   pointer-events:none;}
-.rep-date{font-size:11px;color:var(--text2);margin-bottom:4px;}
+.rep-date{font-size:10px;color:var(--text2);margin-bottom:2px;}
 .rep-title{font-size:14px;font-weight:500;color:var(--text0);margin-bottom:1px;}
 .rep-sub{font-size:10px;color:var(--text2);}
 .rep-badge{display:inline-block;font-size:10px;font-weight:600;
@@ -282,7 +282,8 @@ html,body{height:100%;background:var(--bg0);font-family:'DM Sans',system-ui,sans
 .mc-down{color:var(--s1);}
 
 .rep-chart-card{background:var(--bg1);border:1px solid var(--border);
-  border-radius:12px;padding:8px 8px 5px;margin-bottom:8px;}
+  border-radius:12px;padding:8px 8px 5px;margin-bottom:8px;
+  overflow:hidden;}
 .rcc-title{font-size:10px;font-weight:500;color:var(--text1);margin-bottom:5px;}
 .rcc-legend{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;}
 .rcc-leg{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--text2);}
@@ -306,9 +307,9 @@ html,body{height:100%;background:var(--bg0);font-family:'DM Sans',system-ui,sans
 .day-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:8px;}
 .day-card{background:var(--bg2);border:1px solid var(--border);
   border-radius:7px;padding:5px 3px;text-align:center;}
-.day-name{font-size:9px;color:var(--text2);margin-bottom:3px;}
+.day-name{font-size:8px;color:var(--text2);margin-bottom:2px;}
 .day-score{font-size:12px;font-weight:500;}
-.day-lbl{font-size:8px;margin-top:2px;}
+.day-lbl{font-size:7px;margin-top:1px;}
 
 .bar-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
 .bar-label{font-size:11px;color:var(--text2);width:40px;text-align:right;flex-shrink:0;}
@@ -318,7 +319,7 @@ html,body{height:100%;background:var(--bg0);font-family:'DM Sans',system-ui,sans
 .bar-fill span{font-size:9px;font-weight:500;}
 
 .month-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:6px;}
-.cal-hd{font-size:9px;color:var(--text2);text-align:center;padding:3px 0;font-weight:500;}
+.cal-hd{font-size:8px;color:var(--text2);text-align:center;padding:2px 0;font-weight:500;}
 .cal-day{aspect-ratio:1;border-radius:5px;display:flex;align-items:center;
   justify-content:center;font-size:9px;font-weight:500;}
 .cal-ok{background:rgba(72,214,138,0.18);color:#48d68a;}
@@ -328,7 +329,7 @@ html,body{height:100%;background:var(--bg0);font-family:'DM Sans',system-ui,sans
 .cal-empty{opacity:0;}
 
 .goal-row{display:flex;align-items:center;justify-content:space-between;
-  padding:9px 0;border-bottom:1px solid var(--border);font-size:12px;}
+  padding:6px 0;border-bottom:1px solid var(--border);font-size:11px;}
 .goal-row:last-child{border-bottom:none;}
 .goal-bar-wrap{width:80px;height:5px;background:var(--bg3);border-radius:3px;overflow:hidden;}
 .goal-bar{height:100%;border-radius:3px;}
@@ -506,9 +507,9 @@ html,body{height:100%;background:var(--bg0);font-family:'DM Sans',system-ui,sans
             </div>
           </div>
 
-          <div class="rep-chart-card" style="height:160px;">
+          <div class="rep-chart-card">
             <div class="rcc-title">오늘 측정 포인트 — 일주기 참고 범위</div>
-            <div style="flex:1;min-height:0;position:relative;">
+            <div style="position:relative;height:110px;">
               <canvas id="dailyChart" style="position:absolute;inset:0;width:100%!important;height:100%!important;"></canvas>
             </div>
             <div class="rcc-legend">
@@ -559,9 +560,9 @@ html,body{height:100%;background:var(--bg0);font-family:'DM Sans',system-ui,sans
           <div class="sec-label">요일별 현황</div>
           <div class="day-grid" id="weekly-day-grid"></div>
 
-          <div class="rep-chart-card" style="height:150px;">
+          <div class="rep-chart-card">
             <div class="rcc-title">요일별 최고 단계 분포</div>
-            <div style="flex:1;min-height:0;position:relative;">
+            <div style="position:relative;height:100px;">
               <canvas id="weeklyChart" style="position:absolute;inset:0;width:100%!important;height:100%!important;"></canvas>
             </div>
           </div>
@@ -609,9 +610,9 @@ html,body{height:100%;background:var(--bg0);font-family:'DM Sans',system-ui,sans
             <div class="rcc-leg"><div class="rcc-sq" style="width:10px;height:10px;border-radius:2px;background:rgba(249,112,102,0.18);display:inline-block;"></div><span style="font-size:10px;color:var(--text2);">경계</span></div>
           </div>
 
-          <div class="rep-chart-card" style="height:150px;">
+          <div class="rep-chart-card">
             <div class="rcc-title">주차별 단계 분포 추이</div>
-            <div style="flex:1;min-height:0;position:relative;">
+            <div style="position:relative;height:100px;">
               <canvas id="monthlyChart" style="position:absolute;inset:0;width:100%!important;height:100%!important;"></canvas>
             </div>
           </div>
