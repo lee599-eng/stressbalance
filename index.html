@@ -227,7 +227,7 @@ html,body{height:100%;background:var(--bg0);font-family:'DM Sans',system-ui,sans
 .ah-name{font-size:22px;font-weight:600;letter-spacing:-0.4px;}
 .ah-name span{color:var(--accent);}
 .ah-ver{font-size:11px;color:var(--text2);margin-top:3px;}
-.sec-label{font-size:9px;font-weight:600;color:var(--text2);letter-spacing:1px;text-transform:uppercase;margin:12px 0 6px;}
+.sec-label{font-size:9px;font-weight:600;color:var(--text2);letter-spacing:1px;text-transform:uppercase;margin:8px 0 5px;}
 .about-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;margin-bottom:10px;}
 .about-row{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--border);}
 .about-row:last-child{border-bottom:none;}
@@ -248,10 +248,10 @@ html,body{height:100%;background:var(--bg0);font-family:'DM Sans',system-ui,sans
 /* ════ REPORT PAGE ════ */
 #page-report{overflow-y:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;}
 #page-report::-webkit-scrollbar{display:none;}
-.report-wrap{padding:10px 14px 24px;}
+.report-wrap{padding:6px 12px 16px;}
 
-.rep-tab-row{display:flex;gap:6px;margin-bottom:14px;}
-.rep-tab{flex:1;padding:8px 4px;border-radius:10px;font-size:12px;font-weight:500;
+.rep-tab-row{display:flex;gap:5px;margin-bottom:8px;}
+.rep-tab{flex:1;padding:6px 4px;border-radius:8px;font-size:11px;font-weight:500;
   text-align:center;cursor:pointer;border:1px solid var(--border);
   background:var(--bg2);color:var(--text2);transition:all 0.15s;}
 .rep-tab.active{background:var(--accent);color:#081412;border-color:var(--accent);font-weight:600;}
@@ -260,54 +260,54 @@ html,body{height:100%;background:var(--bg0);font-family:'DM Sans',system-ui,sans
 .rep-section.active{display:block;}
 
 .rep-header-card{background:var(--bg1);border:1px solid var(--border2);
-  border-radius:16px;padding:14px 16px;margin-bottom:12px;position:relative;overflow:hidden;}
+  border-radius:14px;padding:10px 14px;margin-bottom:8px;position:relative;overflow:hidden;}
 .rep-header-card::after{content:'';position:absolute;top:-30px;right:-30px;
   width:120px;height:120px;background:radial-gradient(circle,var(--accent-glow) 0%,transparent 70%);
   pointer-events:none;}
 .rep-date{font-size:11px;color:var(--text2);margin-bottom:4px;}
-.rep-title{font-size:16px;font-weight:500;color:var(--text0);margin-bottom:2px;}
-.rep-sub{font-size:11px;color:var(--text2);}
+.rep-title{font-size:14px;font-weight:500;color:var(--text0);margin-bottom:1px;}
+.rep-sub{font-size:10px;color:var(--text2);}
 .rep-badge{display:inline-block;font-size:10px;font-weight:600;
-  padding:3px 10px;border-radius:20px;margin-top:8px;}
+  padding:2px 8px;border-radius:20px;margin-top:5px;}
 
-.metrics-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px;}
+.metrics-row{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:8px;}
 .metric-card{background:var(--bg2);border:1px solid var(--border);
-  border-radius:12px;padding:10px 12px;}
+  border-radius:10px;padding:7px 10px;}
 .mc-label{font-size:9px;color:var(--text2);letter-spacing:0.5px;
-  text-transform:uppercase;margin-bottom:5px;}
-.mc-val{font-size:22px;font-weight:500;color:var(--text0);line-height:1;}
-.mc-unit{font-size:9px;color:var(--text2);margin-top:2px;}
-.mc-change{font-size:10px;margin-top:4px;}
+  text-transform:uppercase;margin-bottom:3px;}
+.mc-val{font-size:18px;font-weight:500;color:var(--text0);line-height:1;}
+.mc-unit{font-size:9px;color:var(--text2);margin-top:1px;}
+.mc-change{font-size:10px;margin-top:2px;}
 .mc-up{color:var(--s3);}
 .mc-down{color:var(--s1);}
 
 .rep-chart-card{background:var(--bg1);border:1px solid var(--border);
-  border-radius:14px;padding:12px 10px 8px;margin-bottom:12px;}
-.rcc-title{font-size:11px;font-weight:500;color:var(--text1);margin-bottom:8px;}
-.rcc-legend{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
+  border-radius:12px;padding:8px 8px 5px;margin-bottom:8px;}
+.rcc-title{font-size:10px;font-weight:500;color:var(--text1);margin-bottom:5px;}
+.rcc-legend{display:flex;gap:8px;flex-wrap:wrap;margin-top:4px;}
 .rcc-leg{display:flex;align-items:center;gap:4px;font-size:9px;color:var(--text2);}
 .rcc-sq{width:8px;height:8px;border-radius:2px;}
 
-.insight-card{border:1px solid var(--border);border-radius:12px;
-  padding:11px 13px;margin-bottom:8px;display:flex;gap:10px;align-items:flex-start;}
+.insight-card{border:1px solid var(--border);border-radius:10px;
+  padding:8px 11px;margin-bottom:6px;display:flex;gap:8px;align-items:flex-start;}
 .insight-card.warn{border-color:rgba(246,195,67,0.3);background:rgba(246,195,67,0.06);}
 .insight-card.ok{border-color:rgba(72,214,138,0.3);background:rgba(72,214,138,0.06);}
 .insight-card.info{border-color:rgba(79,209,197,0.3);background:rgba(79,209,197,0.06);}
 .insight-card.alert{border-color:rgba(249,112,102,0.3);background:rgba(249,112,102,0.06);}
-.ins-icon{font-size:16px;flex-shrink:0;margin-top:1px;}
-.ins-title{font-size:12px;font-weight:500;color:var(--text0);margin-bottom:3px;}
-.ins-desc{font-size:11px;color:var(--text2);line-height:1.6;}
+.ins-icon{font-size:14px;flex-shrink:0;margin-top:1px;}
+.ins-title{font-size:11px;font-weight:500;color:var(--text0);margin-bottom:2px;}
+.ins-desc{font-size:10px;color:var(--text2);line-height:1.5;}
 
-.action-list{display:flex;flex-direction:column;gap:5px;margin-top:6px;}
-.action-item{display:flex;align-items:flex-start;gap:7px;padding:8px 10px;
-  background:var(--bg3);border-radius:8px;font-size:11px;color:var(--text1);line-height:1.5;}
+.action-list{display:flex;flex-direction:column;gap:4px;margin-top:4px;}
+.action-item{display:flex;align-items:flex-start;gap:6px;padding:6px 8px;
+  background:var(--bg3);border-radius:7px;font-size:10px;color:var(--text1);line-height:1.5;}
 .action-num{font-size:10px;font-weight:600;color:var(--text2);min-width:14px;flex-shrink:0;margin-top:1px;}
 
-.day-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:12px;}
+.day-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:4px;margin-bottom:8px;}
 .day-card{background:var(--bg2);border:1px solid var(--border);
-  border-radius:8px;padding:7px 4px;text-align:center;}
+  border-radius:7px;padding:5px 3px;text-align:center;}
 .day-name{font-size:9px;color:var(--text2);margin-bottom:3px;}
-.day-score{font-size:16px;font-weight:500;}
+.day-score{font-size:12px;font-weight:500;}
 .day-lbl{font-size:8px;margin-top:2px;}
 
 .bar-row{display:flex;align-items:center;gap:8px;margin-bottom:7px;}
@@ -317,10 +317,10 @@ html,body{height:100%;background:var(--bg0);font-family:'DM Sans',system-ui,sans
   justify-content:flex-end;padding-right:5px;}
 .bar-fill span{font-size:9px;font-weight:500;}
 
-.month-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:3px;margin-bottom:10px;}
+.month-cal{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:6px;}
 .cal-hd{font-size:9px;color:var(--text2);text-align:center;padding:3px 0;font-weight:500;}
-.cal-day{aspect-ratio:1;border-radius:6px;display:flex;align-items:center;
-  justify-content:center;font-size:10px;font-weight:500;}
+.cal-day{aspect-ratio:1;border-radius:5px;display:flex;align-items:center;
+  justify-content:center;font-size:9px;font-weight:500;}
 .cal-ok{background:rgba(72,214,138,0.18);color:#48d68a;}
 .cal-warn{background:rgba(246,195,67,0.18);color:#f6c343;}
 .cal-alert{background:rgba(249,112,102,0.18);color:#f97066;}
@@ -496,30 +496,19 @@ html,body{height:100%;background:var(--bg0);font-family:'DM Sans',system-ui,sans
           </div>
           <div class="metrics-row">
             <div class="metric-card">
-              <div class="mc-label">최고 단계</div>
-              <div class="mc-val" id="dm-stage" style="font-size:16px;padding-top:4px;">—</div>
-              <div class="mc-unit">오늘</div>
+              <div class="mc-label">오늘 최고 단계</div>
+              <div class="mc-val" id="dm-stage" style="font-size:13px;padding-top:3px;">—</div>
             </div>
             <div class="metric-card">
-              <div class="mc-label">총 측정 횟수</div>
+              <div class="mc-label">측정 횟수</div>
               <div class="mc-val" id="dm-count">0</div>
-              <div class="mc-unit">회</div>
-            </div>
-            <div class="metric-card">
-              <div class="mc-label">첫 측정</div>
-              <div class="mc-val" id="dm-first" style="font-size:14px;padding-top:4px;">—</div>
-              <div class="mc-unit"></div>
-            </div>
-            <div class="metric-card">
-              <div class="mc-label">마지막 측정</div>
-              <div class="mc-val" id="dm-last" style="font-size:14px;padding-top:4px;">—</div>
-              <div class="mc-unit"></div>
+              <div class="mc-unit">회 · <span id="dm-first" style="font-size:10px;">—</span></div>
             </div>
           </div>
 
           <div class="rep-chart-card">
             <div class="rcc-title">오늘 측정 포인트 — 일주기 참고 범위</div>
-            <canvas id="dailyChart" height="130"></canvas>
+            <canvas id="dailyChart" height="70"></canvas>
             <div class="rcc-legend">
               <div class="rcc-leg"><div class="rcc-sq" style="background:#4fd1c5;"></div>참고 상한</div>
               <div class="rcc-leg"><div class="rcc-sq" style="background:rgba(79,209,197,0.3);"></div>참고 하한</div>
@@ -570,7 +559,7 @@ html,body{height:100%;background:var(--bg0);font-family:'DM Sans',system-ui,sans
 
           <div class="rep-chart-card">
             <div class="rcc-title">요일별 최고 단계 분포</div>
-            <canvas id="weeklyChart" height="120"></canvas>
+            <canvas id="weeklyChart" height="70"></canvas>
           </div>
 
           <div class="sec-label">주간 인사이트</div>
@@ -618,7 +607,7 @@ html,body{height:100%;background:var(--bg0);font-family:'DM Sans',system-ui,sans
 
           <div class="rep-chart-card">
             <div class="rcc-title">주차별 단계 분포 추이</div>
-            <canvas id="monthlyChart" height="120"></canvas>
+            <canvas id="monthlyChart" height="70"></canvas>
           </div>
 
           <div class="sec-label">월간 인사이트</div>
@@ -1036,8 +1025,8 @@ function buildDailyReport(){
   document.getElementById('dm-stage').style.color=STAGE_COLORS[maxSi];
   document.getElementById('dm-count').textContent=entries.length;
   const fmt=e=>{const h=e.hour%12||12,ap=e.hour<12?'오전':'오후';return`${ap} ${h}:${String(e.min).padStart(2,'0')}`;};
-  document.getElementById('dm-first').textContent=fmt(entries[0]);
-  document.getElementById('dm-last').textContent=fmt(entries[entries.length-1]);
+  document.getElementById('dm-first').textContent=fmt(entries[0])+(entries.length>1?' ~ '+fmt(entries[entries.length-1]):'');
+  
 
   buildDailyChart(entries);
 
