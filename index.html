@@ -509,9 +509,7 @@ html,body{height:100%;background:var(--bg0);font-family:'DM Sans',system-ui,sans
 
           <div class="rep-chart-card">
             <div class="rcc-title">오늘 측정 포인트 — 일주기 참고 범위</div>
-            <div style="position:relative;height:110px;">
-              <canvas id="dailyChart" style="position:absolute;inset:0;width:100%!important;height:100%!important;"></canvas>
-            </div>
+            <canvas id="dailyChart" height="110"></canvas>
             <div class="rcc-legend">
               <div class="rcc-leg"><div class="rcc-sq" style="background:#4fd1c5;"></div>참고 상한</div>
               <div class="rcc-leg"><div class="rcc-sq" style="background:rgba(79,209,197,0.3);"></div>참고 하한</div>
@@ -562,9 +560,7 @@ html,body{height:100%;background:var(--bg0);font-family:'DM Sans',system-ui,sans
 
           <div class="rep-chart-card">
             <div class="rcc-title">요일별 최고 단계 분포</div>
-            <div style="position:relative;height:100px;">
-              <canvas id="weeklyChart" style="position:absolute;inset:0;width:100%!important;height:100%!important;"></canvas>
-            </div>
+            <canvas id="weeklyChart" height="100"></canvas>
           </div>
 
           <div class="sec-label">주간 인사이트</div>
@@ -612,9 +608,7 @@ html,body{height:100%;background:var(--bg0);font-family:'DM Sans',system-ui,sans
 
           <div class="rep-chart-card">
             <div class="rcc-title">주차별 단계 분포 추이</div>
-            <div style="position:relative;height:100px;">
-              <canvas id="monthlyChart" style="position:absolute;inset:0;width:100%!important;height:100%!important;"></canvas>
-            </div>
+            <canvas id="monthlyChart" height="100"></canvas>
           </div>
 
           <div class="sec-label">월간 인사이트</div>
@@ -1086,7 +1080,7 @@ function buildDailyChart(entries){
           borderColor:'#080c14',backgroundColor:entries.map(e=>STAGE_COLORS[e.si||0]),order:1}
       ]
     },
-    options:{responsive:true,maintainAspectRatio:false,animation:{duration:250},
+    options:{responsive:true,maintainAspectRatio:true,animation:{duration:250},
       plugins:{legend:{display:false},tooltip:{
         backgroundColor:'rgba(10,15,28,0.96)',borderColor:'rgba(255,255,255,0.08)',borderWidth:1,
         titleColor:'#f0f4ff',bodyColor:'#a8b5cc',padding:8,cornerRadius:8,
@@ -1179,7 +1173,7 @@ function buildWeeklyChart(dayStages, weekKeys){
   repWeeklyChart=new Chart(ctx,{
     type:'bar',
     data:{labels,datasets:[{data,backgroundColor:colors,borderRadius:6,barThickness:28}]},
-    options:{responsive:true,maintainAspectRatio:false,animation:{duration:250},
+    options:{responsive:true,maintainAspectRatio:true,animation:{duration:250},
       plugins:{legend:{display:false},tooltip:{
         backgroundColor:'rgba(10,15,28,0.96)',borderColor:'rgba(255,255,255,0.08)',borderWidth:1,
         titleColor:'#f0f4ff',bodyColor:'#a8b5cc',padding:8,cornerRadius:8,
@@ -1309,7 +1303,7 @@ function buildMonthlyChart(monthKeys, all){
         {label:'경계',data:weeks.map(w=>w.counts[3]),backgroundColor:'rgba(199,125,255,0.7)',borderRadius:3},
       ]
     },
-    options:{responsive:true,maintainAspectRatio:false,animation:{duration:250},
+    options:{responsive:true,maintainAspectRatio:true,animation:{duration:250},
       plugins:{legend:{display:true,labels:{color:'#5e7090',font:{size:9},boxWidth:10}}},
       scales:{
         x:{stacked:true,grid:{display:false},ticks:{color:'#5e7090',font:{size:10}}},
