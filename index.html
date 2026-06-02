@@ -506,9 +506,11 @@ html,body{height:100%;background:var(--bg0);font-family:'DM Sans',system-ui,sans
             </div>
           </div>
 
-          <div class="rep-chart-card">
+          <div class="rep-chart-card" style="height:160px;">
             <div class="rcc-title">오늘 측정 포인트 — 일주기 참고 범위</div>
-            <canvas id="dailyChart" height="70"></canvas>
+            <div style="flex:1;min-height:0;position:relative;">
+              <canvas id="dailyChart" style="position:absolute;inset:0;width:100%!important;height:100%!important;"></canvas>
+            </div>
             <div class="rcc-legend">
               <div class="rcc-leg"><div class="rcc-sq" style="background:#4fd1c5;"></div>참고 상한</div>
               <div class="rcc-leg"><div class="rcc-sq" style="background:rgba(79,209,197,0.3);"></div>참고 하한</div>
@@ -557,9 +559,11 @@ html,body{height:100%;background:var(--bg0);font-family:'DM Sans',system-ui,sans
           <div class="sec-label">요일별 현황</div>
           <div class="day-grid" id="weekly-day-grid"></div>
 
-          <div class="rep-chart-card">
+          <div class="rep-chart-card" style="height:150px;">
             <div class="rcc-title">요일별 최고 단계 분포</div>
-            <canvas id="weeklyChart" height="70"></canvas>
+            <div style="flex:1;min-height:0;position:relative;">
+              <canvas id="weeklyChart" style="position:absolute;inset:0;width:100%!important;height:100%!important;"></canvas>
+            </div>
           </div>
 
           <div class="sec-label">주간 인사이트</div>
@@ -605,9 +609,11 @@ html,body{height:100%;background:var(--bg0);font-family:'DM Sans',system-ui,sans
             <div class="rcc-leg"><div class="rcc-sq" style="width:10px;height:10px;border-radius:2px;background:rgba(249,112,102,0.18);display:inline-block;"></div><span style="font-size:10px;color:var(--text2);">경계</span></div>
           </div>
 
-          <div class="rep-chart-card">
+          <div class="rep-chart-card" style="height:150px;">
             <div class="rcc-title">주차별 단계 분포 추이</div>
-            <canvas id="monthlyChart" height="70"></canvas>
+            <div style="flex:1;min-height:0;position:relative;">
+              <canvas id="monthlyChart" style="position:absolute;inset:0;width:100%!important;height:100%!important;"></canvas>
+            </div>
           </div>
 
           <div class="sec-label">월간 인사이트</div>
